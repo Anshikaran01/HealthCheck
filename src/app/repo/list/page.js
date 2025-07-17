@@ -24,33 +24,32 @@ export default async function Page() {
     },
   });
 
-  const repos = repositories.filter((repo) => repo.checks.length > 0);
+  const reposWithChecks = repositories.filter((repo) => repo.checks.length > 0);
 
   return (
     <>
-      <Title text={`Repo list (${repos.length})`} />
+      <Title text={`Repo list (${reposWithChecks.length})`} />
       <Platform repositories={repositories} />
       <List
-        data={repos.map((repo) => ({
-          id: repo.id,
-          href: `/repo/report/${repo.checks[0].id}`,
-          title: `${repo.owner} / ${repo.repo}`,
-          status: repo.checks[0] ? worstCheck(repo.checks[0]) : "-",
-          description: `Added ${formatDistance(repo.createdAt, new Date(), {
-            addSuffix: true,
-          })}`,
-          extra: repo.checks[0]
-            ? `Last check performed ${formatDistance(
-                repo.checks[0].createdAt,
-                new Date(),
-                {
-                  addSuffix: true,
-                },
-              )} with ${repo.checks[0].red} error(s), ${
-                repo.checks[0].amber
-              } warning(s), ${repo.checks[0].green} success(es)`
-            : "No checks performed yet",
-        }))}
+        data={reposWithChecks.map((repo) => {
+  const check = repo.checks[0];
+
+  return {
+    id: repo.id,
+    href: `/repo/report/${check.id}`,
+    title: `${repo.owner} / ${repo.repo}`,
+    status: worstCheck(check),
+    description: `Added ${formatDistance(repo.createdAt, new Date(), {
+      addSuffix: true,
+    })}`,
+    extra: `Last check performed ${formatDistance(
+      check.createdAt,
+      new Date(),
+      { addSuffix: true }
+    )} with ${check.red} error(s), ${check.amber} warning(s), ${check.green} success(es)`,
+  };
+})}
+
       />
     </>
   );
